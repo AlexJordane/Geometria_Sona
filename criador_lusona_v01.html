@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Explorador de Sona Interativo</title>
+    <style>
+        :root {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: #202735;
+            background: #d1def3
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            max-width: 1200px;
+            margin: auto
+        }
+
+        h1 {
+            font-size: 1.55rem;
+            margin: 0 0 8px;
+            text-align: center;
+        }
+
+        p {
+            line-height: 1.45
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #dce2ea;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 14px 0;
+            box-shadow: 0 2px 8px #1720330a
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            align-items: stretch
+        }
+
+        label {
+            display: grid;
+            gap: 5px;
+            font-size: .9rem
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 9px;
+            border: 1px solid #bac5d3;
+            border-radius: 7px;
+            font-size: 1rem
+        }
+
+        button {
+            border: 0;
+            border-radius: 8px;
+            padding: 10px 15px;
+            background: #2457a6;
+            color: white;
+            font-weight: 600;
+            cursor: pointer
+        }
+
+        button.secondary {
+            background: #e7edf6;
+            color: #23334d
+        }
+
+        .check {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding-bottom: 8px
+        }
+
+        .check input {
+            width: auto
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 14px;
+            align-items: start;
+            margin: 14px 0
+        }
+
+        .workspace .panel {
+            margin: 0
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 14px
+        }
+
+        .table-panel {
+            text-align: center
+        }
+
+        canvas {
+            width: 100%;
+            height: 505px;
+            display: block;
+            margin: 0 auto;
+            background: #fff;
+            border: 1px solid #e1e6ed;
+            border-radius: 8px
+        }
+
+        .legend {
+            font-size: .88rem;
+            color: #526071
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            background: #edf3ff;
+            color: #234d91;
+            font-size: .82rem
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            font-size: .93rem
+        }
+
+        .stats strong {
+            font-size: 1.15rem;
+            display: block
+        }
+
+        .cycle-row {
+            margin: 10px 0;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border-left: 4px solid #2457a6;
+            border-radius: 6px;
+            font-size: .9rem;
+            line-height: 1.6
+        }
+
+        .coord-chip {
+            display: inline-block;
+            padding: 2px 7px;
+            margin: 2px 3px;
+            border-radius: 5px;
+            background: #eef2f7;
+            font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+            font-size: .83rem
+        }
+
+        footer {
+            text-align: center;
+            font-size: .85rem;
+            color: #526071;
+            margin-top: 18px;
+            padding-top: 8px
+        }
+
+        @media(max-width:760px) {
+            .workspace {
+                grid-template-columns: 1fr
+            }
+
+            canvas {
+                height: 320px
+            }
+
+            body {
+                padding: 12px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Geometria Sona</h1>
+
+    <div class="workspace">
+        <div class="sidebar">
+            <section class="panel">
+                <div class="controls">
+                    <label>Linhas da matriz principal (m)<input id="m" type="number" min="1" max="20" value="3"></label>
+                    <label>Colunas da matriz principal (n)<input id="n" type="number" min="1" max="20"
+                            value="4"></label>
+                    <button id="draw">Atualizar desenho</button>
+                    <button class="secondary" id="animate">Animar trajetória</button>
+                    <label class="check"><input id="fastAnim" type="checkbox" checked> Animação rápida</label>
+                    <label class="check"><input id="showSecondary" type="checkbox" checked> Mostrar matriz
+                        secundária</label>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="stats">
+                    <div><span class="legend">Matriz Principal</span><strong id="dims">3 × 4</strong></div>
+                    <div><span class="legend">Pontos Principais</span><strong id="points">12</strong></div>
+                    <div><span class="legend">Pontos Secundários</span><strong id="secPoints">31</strong></div>
+                    <div><span class="legend">MDC(m,n) (Ciclos)</span><strong id="gcd">1</strong></div>
+                </div>
+            </section>
+        </div>
+
+        <section class="panel table-panel">
+            <h2 style="font-size:1.1rem">Matriz Sona e trajetórias</h2>
+            <canvas id="table"></canvas>
+        </section>
+    </div>
+
+    <section class="panel">
+        <h2 style="font-size:1.05rem">Coordenadas da trajetória e pontos de passagem</h2>
+        <div id="coordLog" style="margin-top:12px"></div>
+    </section>
+
+    <footer>Este recurso computacional foi elaborado por Alex Jordane, em colaboração com a inteligência artificial
+        Gemini (modelo Gemini 2.5 Pro, Google), que apoiou a modelagem geométrica, a escrita do código e a análise
+        matemática das trajetórias dos sona.</footer>
+
+    <script>
+        const $ = id => document.getElementById(id);
+        const gcd = (a, b) => b ? gcd(b, a % b) : a;
+        function lcm(a, b) { return a / gcd(a, b) * b }
+        let raf = null, animTimer = null, progress = 0, paths = [];
+
+        function setupCanvas(c) {
+            const dpr = window.devicePixelRatio || 1, r = c.getBoundingClientRect();
+            c.width = Math.max(1, Math.round(r.width * dpr));
+            c.height = Math.max(1, Math.round(r.height * dpr));
+            const ctx = c.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, w: r.width, h: r.height };
+        }
+
+        function geometry(w, h, W, H, margin = 44) {
+            const s = Math.min((w - 2 * margin) / Math.max(1, W), (h - 2 * margin) / Math.max(1, H));
+            return { s, ox: (w - W * s) / 2, oy: (h - H * s) / 2 };
+        }
+
+        function makePaths(W, H) {
+            const starts = [];
+            for (let x = 0; x < W; x++) {
+                starts.push([x + 0.5, 0, 1, 1], [x + 0.5, 0, -1, 1]);
+                starts.push([x + 0.5, H, 1, -1], [x + 0.5, H, -1, -1]);
+            }
+            for (let y = 0; y < H; y++) {
+                starts.push([0, y + 0.5, 1, 1], [0, y + 0.5, 1, -1]);
+                starts.push([W, y + 0.5, -1, 1], [W, y + 0.5, -1, -1]);
+            }
+            const found = new Set(), out = [];
+            const key = (x, y, dx, dy) => [Math.round(x * 1000), Math.round(y * 1000), dx, dy].join(',');
+            const normSeg = ([x1, y1, x2, y2]) => {
+                const p1 = `${Math.round(x1 * 1000)},${Math.round(y1 * 1000)}`;
+                const p2 = `${Math.round(x2 * 1000)},${Math.round(y2 * 1000)}`;
+                return p1 < p2 ? `${p1}:${p2}` : `${p2}:${p1}`;
+            };
+            for (const st of starts) {
+                let [x, y, dx, dy] = st, segs = [], stateKey = key(x, y, dx, dy), seen = new Set();
+                for (let k = 0; k < 4 * (W + H) + 20; k++) {
+                    if (seen.has(stateKey)) break;
+                    seen.add(stateKey);
+                    let tx = dx > 0 ? (W - x) : x, ty = dy > 0 ? (H - y) : y, t = Math.min(tx, ty);
+                    let nx = x + dx * t, ny = y + dy * t;
+                    segs.push([x, y, nx, ny]);
+                    x = nx; y = ny;
+                    if (Math.abs(x) < 1e-8 || Math.abs(x - W) < 1e-8) dx *= -1;
+                    if (Math.abs(y) < 1e-8 || Math.abs(y - H) < 1e-8) dy *= -1;
+                    stateKey = key(x, y, dx, dy);
+                    if (segs.length > 1 && Math.abs(x - st[0]) < 1e-8 && Math.abs(y - st[1]) < 1e-8 && dx === st[2] && dy === st[3]) break;
+                }
+                const sig = segs.map(normSeg).sort().join('|');
+                if (!found.has(sig)) { found.add(sig); out.push({ segs, start: st }) }
+            }
+            return out;
+        }
+
+        function buildRoundedPieces(segs) {
+            const c = 0.25, r = c * Math.SQRT2, arcLen = 0.5 * Math.PI * r, N = segs.length, pieces = [];
+            for (let j = 0; j < N; j++) {
+                const [x1, y1, x2, y2] = segs[j];
+                const dx1 = Math.sign(x2 - x1), dy1 = Math.sign(y2 - y1);
+                const next = segs[(j + 1) % N];
+                const dx2 = Math.sign(next[2] - next[0]), dy2 = Math.sign(next[3] - next[1]);
+                const sx1 = x1 + c * dx1, sy1 = y1 + c * dy1;
+                const sx2 = x2 - c * dx1, sy2 = y2 - c * dy1;
+                const segLen = Math.hypot(sx2 - sx1, sy2 - sy1);
+                if (segLen > 1e-8) pieces.push({ type: 'line', x1: sx1, y1: sy1, x2: sx2, y2: sy2, len: segLen });
+                const bx = x2 + c * dx2, by = y2 + c * dy2;
+                const cx = x2 - c * dx1 + c * dx2, cy = y2 - c * dy1 + c * dy2;
+                pieces.push({ type: 'arc', cx, cy, r, ax: sx2, ay: sy2, bx, by, len: arcLen, port: [x2, y2] });
+            }
+            return pieces;
+        }
+
+        function fmtCoord([px, py]) {
+            const f = v => Number(Math.round(v * 10) / 10);
+            return `(${f(px)},${f(py)})`;
+        }
+
+        function getSecondaryPoints(W, H) {
+            const borderPorts = [];
+            for (let x = 0; x < W; x++) {
+                borderPorts.push({ pt: [x + 0.5, 0], type: 'borda' });
+                borderPorts.push({ pt: [x + 0.5, H], type: 'borda' });
+            }
+            for (let y = 0; y < H; y++) {
+                borderPorts.push({ pt: [0, y + 0.5], type: 'borda' });
+                borderPorts.push({ pt: [W, y + 0.5], type: 'borda' });
+            }
+
+            const internalIntersections = [];
+            // Pontos médios horizontais entre nós principais adjacentes
+            for (let x = 1; x < W; x++) {
+                for (let y = 0; y < H; y++) {
+                    internalIntersections.push({ pt: [x, y + 0.5], type: 'interno' });
+                }
+            }
+            // Pontos médios verticais entre nós principais adjacentes
+            for (let x = 0; x < W; x++) {
+                for (let y = 1; y < H; y++) {
+                    internalIntersections.push({ pt: [x + 0.5, y], type: 'interno' });
+                }
+            }
+
+            return { borderPorts, internalIntersections, all: [...borderPorts, ...internalIntersections] };
+        }
+
+        function drawTable(m, n, upto = 1) {
+            const c = $('table'), { ctx, w, h } = setupCanvas(c);
+            ctx.clearRect(0, 0, w, h);
+            const W = n, H = m, g = geometry(w, h, W, H, 44);
+            const X = x => g.ox + x * g.s, Y = y => g.oy + (H - y) * g.s;
+
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, w, h);
+
+            // Tabuleiro de areia
+            ctx.fillStyle = '#f7f3e9';
+            ctx.fillRect(X(0), Y(H), W * g.s, H * g.s);
+
+            // Linhas suaves da malha orientadora
+            /*             if ($('showSecondary').checked) {
+                            ctx.strokeStyle = '#ebe3d1';
+                            ctx.lineWidth = 1;
+                            for (let x = 1; x < W; x++) {
+                                ctx.beginPath(); ctx.moveTo(X(x), Y(0)); ctx.lineTo(X(x), Y(H)); ctx.stroke();
+                            }
+                            for (let y = 1; y < H; y++) {
+                                ctx.beginPath(); ctx.moveTo(X(0), Y(y)); ctx.lineTo(X(W), Y(y)); ctx.stroke();
+                            }
+                        }
+             */
+            // Pontos da Matriz Principal (nos centros dos quadrados)
+            const dotR = Math.max(2.5, Math.min(5.5, g.s * 0.12));
+            const secR = Math.max(1.8, Math.min(3.8, g.s * 0.08));
+            ctx.fillStyle = '#182a43';
+            for (let y = 0; y < m; y++) {
+                for (let x = 0; x < n; x++) {
+                    ctx.beginPath();
+                    ctx.arc(X(x + 0.5), Y(y + 0.5), dotR, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            paths = makePaths(W, H);
+            const palette = ['#1769aa', '#d1495b', '#27864b', '#8055a5', '#d17b16', '#168b91', '#b23a8b', '#596579'];
+            const clampedUpto = Math.max(0, Math.min(1, upto));
+            const visitedPorts = new Map();
+            const portKey = (x, y) => `${Math.round(x * 10)},${Math.round(y * 10)}`;
+            const cycleLogs = [];
+
+            if (clampedUpto > 0) {
+                const K = paths.length;
+                paths.forEach((p, i) => {
+                    const pathUpto = Math.max(0, Math.min(1, clampedUpto * K - i));
+                    if (pathUpto <= 0) return;
+                    const color = palette[i % palette.length];
+                    const pieces = buildRoundedPieces(p.segs);
+                    const totalLen = pieces.reduce((s, pc) => s + pc.len, 0);
+                    const target = totalLen * pathUpto;
+                    const startPort = [p.segs[0][0], p.segs[0][1]];
+                    const coords = [startPort];
+                    visitedPorts.set(portKey(startPort[0], startPort[1]), color);
+
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = Math.max(1.2, Math.min(2.4, g.s * 0.06));
+                    ctx.lineJoin = 'round';
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    let acc = 0, started = false;
+                    for (const pc of pieces) {
+                        if (acc >= target && pathUpto < 1) break;
+                        const t = pathUpto >= 1 ? 1 : Math.min(1, (target - acc) / pc.len);
+                        if (pc.type === 'line') {
+                            if (!started) { ctx.moveTo(X(pc.x1), Y(pc.y1)); started = true; }
+                            ctx.lineTo(X(pc.x1 + (pc.x2 - pc.x1) * t), Y(pc.y1 + (pc.y2 - pc.y1) * t));
+                        } else {
+                            if (t >= 0.5 || pathUpto >= 1) {
+                                visitedPorts.set(portKey(pc.port[0], pc.port[1]), color);
+                                coords.push(pc.port);
+                            }
+                            const ang1 = Math.atan2(Y(pc.ay) - Y(pc.cy), X(pc.ax) - X(pc.cx));
+                            const ang2 = Math.atan2(Y(pc.by) - Y(pc.cy), X(pc.bx) - X(pc.cx));
+                            let dAng = ang2 - ang1;
+                            while (dAng <= -Math.PI) dAng += 2 * Math.PI;
+                            while (dAng > Math.PI) dAng -= 2 * Math.PI;
+                            if (!started) { ctx.moveTo(X(pc.ax), Y(pc.ay)); started = true; }
+                            ctx.arc(X(pc.cx), Y(pc.cy), pc.r * g.s, ang1, ang1 + dAng * t, dAng < 0);
+                        }
+                        acc += pc.len;
+                    }
+                    if (pathUpto >= 1) ctx.closePath();
+                    ctx.stroke();
+                    cycleLogs.push({ index: i + 1, color, coords, closed: pathUpto >= 1 });
+                });
+            }
+
+            // Exibição da Matriz Secundária (Bordas + Vértices Intermediários)
+            const secondaryData = getSecondaryPoints(W, H);
+            $('secPoints').textContent = secondaryData.all.length;
+
+            if ($('showSecondary').checked) {
+                // 1. Pontos de borda (portas de reflexão)
+                for (const item of secondaryData.borderPorts) {
+                    const [px, py] = item.pt;
+                    const usedColor = visitedPorts.get(portKey(px, py));
+                    ctx.beginPath();
+                    ctx.arc(X(px), Y(py), usedColor ? secR * 0.9 : secR, 0, Math.PI * 2);
+                    ctx.fillStyle = usedColor || '#d97706';
+                    ctx.fill();
+
+                    if (usedColor && g.s >= 26) {
+                        ctx.fillStyle = usedColor;
+                        ctx.font = '10px system-ui';
+                        ctx.textAlign = 'center';
+                        const dy = py === 0 ? 13 : (py === H ? -7 : 3);
+                        const dx = px === 0 ? -22 : (px === W ? 22 : 0);
+                        ctx.fillText(fmtCoord([px, py]), X(px) + dx, Y(py) + dy);
+                    }
+                }
+
+                // 2. Pontos intermediários entre os nós principais (pontos médios dos pontos da matriz principal)
+                for (const item of secondaryData.internalIntersections) {
+                    const [ix, iy] = item.pt;
+                    ctx.beginPath();
+                    ctx.arc(X(ix), Y(iy), secR * 0.9, 0, Math.PI * 2);
+                    ctx.fillStyle = '#b45309'; // Tom âmbar/ferrugem para distinguir dos pontos principais
+                    ctx.fill();
+                }
+                ctx.textAlign = 'start';
+            }
+
+            const totalPorts = 2 * (W + H);
+            const logEl = $('coordLog');
+            if (logEl) {
+                if (cycleLogs.length === 0) {
+                    logEl.innerHTML = `<span class="legend">Pontos da borda percorridos: <strong>0 / ${totalPorts}</strong>. Clique em <strong>Animar trajetória</strong> para acompanhar a construção passo a passo.</span>`;
+                } else {
+                    const header = `<div class="legend" style="margin-bottom:6px">Pontos da borda percorridos: <strong>${visitedPorts.size} / ${totalPorts}</strong> | Pontos médios internos: <strong>${secondaryData.internalIntersections.length}</strong></div>`;
+                    const rows = cycleLogs.map(c => {
+                        const chips = c.coords.map((pt, idx) => `<span class="coord-chip">${idx === 0 ? 'Início ' : ''}${fmtCoord(pt)}</span>`).join(' → ');
+                        const status = c.closed ? ` <span class="badge">✓ trajetória fechada</span>` : '';
+                        return `<div class="cycle-row" style="border-left-color:${c.color}"><strong style="color:${c.color}">Trajetória ${c.index}:</strong> ${chips}${status}</div>`;
+                    }).join('');
+                    logEl.innerHTML = header + rows;
+                }
+            }
+        }
+
+        function stopAnim() {
+            if (raf) { cancelAnimationFrame(raf); raf = null; }
+            if (animTimer) { clearTimeout(animTimer); animTimer = null; }
+        }
+
+        function startAnim() {
+            const hadLines = progress > 0 || raf !== null || animTimer !== null;
+            stopAnim();
+            const m = Math.max(1, Math.min(20, parseInt($('m').value) || 3));
+            const n = Math.max(1, Math.min(20, parseInt($('n').value) || 4));
+            $('m').value = m;
+            $('n').value = n;
+            $('dims').textContent = `${m} × ${n}`;
+            $('points').textContent = m * n;
+            $('gcd').textContent = gcd(m, n);
+            progress = 0;
+            drawTable(m, n, 0);
+
+            function run() {
+                let lastTime = null;
+                function step(t) {
+                    if (lastTime === null) lastTime = t;
+                    const dt = t - lastTime;
+                    lastTime = t;
+                    const speed = $('fastAnim').checked ? 1 : 0.5;
+                    const duration = 5000 * Math.sqrt((m * n) / 12);
+                    progress += (dt / duration) * speed;
+                    if (progress >= 1) {
+                        progress = 1;
+                        drawTable(+$('m').value, +$('n').value, 1);
+                        raf = null;
+                        return;
+                    }
+                    drawTable(+$('m').value, +$('n').value, progress);
+                    raf = requestAnimationFrame(step);
+                }
+                raf = requestAnimationFrame(step);
+            }
+
+            if (hadLines) {
+                animTimer = setTimeout(() => { animTimer = null; run(); }, 350);
+            } else {
+                run();
+            }
+        }
+
+        function render() {
+            const m = Math.max(1, Math.min(20, parseInt($('m').value) || 3));
+            const n = Math.max(1, Math.min(20, parseInt($('n').value) || 4));
+            $('m').value = m;
+            $('n').value = n;
+            $('dims').textContent = `${m} × ${n}`;
+            $('points').textContent = m * n;
+            $('gcd').textContent = gcd(m, n);
+            if (!raf) drawTable(m, n, progress);
+        }
+
+        $('draw').addEventListener('click', () => { stopAnim(); progress = 0; render(); });
+        $('showSecondary').addEventListener('change', render);
+        $('animate').addEventListener('click', startAnim);
+        window.addEventListener('resize', render);
+        render();
+    </script>
+</body>
+
+</html>
