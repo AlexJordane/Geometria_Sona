@@ -196,10 +196,100 @@
 
         footer {
             text-align: center;
-            font-size: .85rem;
-            color: #526071;
+            font-size: .88rem;
+            color: #4a5568;
             margin-top: 18px;
-            padding-top: 8px
+            padding: 20px 16px;
+            background: #ffffff;
+            border: 1px solid #dce2ea;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #1720330a;
+            line-height: 1.6;
+        }
+
+        footer p {
+            margin: 0 0 8px 0;
+        }
+
+        footer img {
+            margin-top: 8px;
+            height: 32px;
+        }
+
+        .header-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 28px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .header-logos img {
+            max-height: 64px;
+            width: auto;
+        }
+
+        .header-logos img.logo-destaque {
+            max-height: 96px;
+        }
+
+        .instituicao {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .instituicao p {
+            margin: 2px 0;
+        }
+
+        .cursos {
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #4a5568;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .cursos p {
+            margin: 2px 0;
+        }
+
+        .professor {
+            text-align: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #4a5568;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .professor p {
+            margin: 2px 0;
+        }
+
+        .header-title {
+            font-size: 1.85rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 8px;
+            text-align: center;
+            color: #1a202c;
+            line-height: 1.3;
+        }
+
+        .header-subtitulo {
+            text-align: center;
+            color: #4a5568;
+            font-size: 1.05rem;
+            margin-top: 0;
+            margin-bottom: 0;
         }
 
         @media(max-width:760px) {
@@ -219,7 +309,28 @@
 </head>
 
 <body>
-    <h1>Geometria Sona</h1>
+    <header class="panel" style="padding: 28px 24px;">
+        <div class="header-logos">
+            <img src="https://alexjordane.github.io/Limat.jpeg" alt="Limat" class="logo-destaque">
+            <img src="https://alexjordane.github.io/ifes.png" alt="Instituto Federal do Espírito Santo">
+            <img src="https://alexjordane.github.io/Educimat.png" alt="Educimat" class="logo-destaque">
+        </div>
+
+        <div class="instituicao">
+            <p>Instituto Federal do Espírito Santo</p>
+        </div>
+
+        <div class="cursos">
+            <p>Licenciatura em Matemática &bull; Educimat</p>
+        </div>
+
+        <div class="professor">
+            <p>Professor Alex Jordane</p>
+        </div>
+
+        <h1 class="header-title">Geometria Sona</h1>
+        <p class="header-subtitulo">Explorador interativo de matrizes e trajetórias da tradição Chokwe (Lusona)</p>
+    </header>
 
     <div class="workspace">
         <div class="sidebar">
@@ -250,9 +361,16 @@
         </section>
     </div>
 
-    <footer>Este recurso computacional foi elaborado por Alex Jordane, em colaboração com a inteligência artificial
-        Gemini (modelo Gemini 2.5 Pro, Google), que apoiou a modelagem geométrica, a escrita do código e a análise
-        matemática das trajetórias dos sona.</footer>
+    <footer>
+        <p>
+            <strong>Autoria:</strong> Professor Alex Jordane, em colaboração com Inteligência Artificial (Gemini).<br>
+            Esta obra está licenciada sob uma Licença <strong>Creative Commons Atribuição-NãoComercial-SemDerivações 4.0
+                Internacional (CC BY-NC-ND 4.0)</strong>.
+        </p>
+        <p> O compartilhamento e a reprodução deste material são permitidos para fins didáticos, desde que citadas a fonte
+            e a autoria.</p>
+        <img src="https://alexjordane.github.io/CC.png" alt="Licença Creative Commons CC BY-NC-ND 4.0">
+    </footer>
 
     <script>
         const $ = id => document.getElementById(id);
